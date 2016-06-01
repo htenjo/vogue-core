@@ -1,5 +1,6 @@
 package co.zero.vogue.model;
 
+import javax.persistence.Entity;
 import java.util.Date;
 
 /**
