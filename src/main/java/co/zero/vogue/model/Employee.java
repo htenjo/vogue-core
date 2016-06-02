@@ -17,8 +17,6 @@ public class Employee {
     private long lastName;
     private String email;
 
-
-
     public long getId() {
         return id;
     }
