@@ -13,8 +13,8 @@ import javax.persistence.Id;
 public class Employee {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    private long firstName;
-    private long lastName;
+    private String firstName;
+    private String lastName;
     private String email;
 
     public long getId() {
@@ -25,19 +25,19 @@ public class Employee {
         this.id = id;
     }
 
-    public long getFirstName() {
+    public String getFirstName() {
         return firstName;
     }
 
-    public void setFirstName(long firstName) {
+    public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
-    public long getLastName() {
+    public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(long lastName) {
+    public void setLastName(String lastName) {
         this.lastName = lastName;
     }
 

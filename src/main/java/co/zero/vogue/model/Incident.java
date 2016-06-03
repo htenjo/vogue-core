@@ -1,7 +1,7 @@
 package co.zero.vogue.model;
 
 import co.zero.vogue.common.ProbabilityType;
-import co.zero.vogue.common.ReportType;
+import co.zero.vogue.common.IncidentType;
 import co.zero.vogue.common.SeverityType;
 
 import javax.persistence.*;
@@ -13,11 +13,11 @@ import java.util.Date;
 @Entity
 public class Incident {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private String id;
+    private long id;
     /** This is a kind of id given by an external system */
     private String sio;
     @Enumerated(value = EnumType.STRING)
-    private ReportType type;
+    private IncidentType type;
     @ManyToOne
     private Employee collaborator;
     @ManyToOne
@@ -41,11 +41,11 @@ public class Incident {
     @ManyToOne
     private Employee supervisor;
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -57,11 +57,11 @@ public class Incident {
         this.sio = sio;
     }
 
-    public ReportType getType() {
+    public IncidentType getType() {
         return type;
     }
 
-    public void setType(ReportType type) {
+    public void setType(IncidentType type) {
         this.type = type;
     }
 
