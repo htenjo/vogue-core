@@ -7,10 +7,7 @@ import co.zero.vogue.model.Incident;
 import co.zero.vogue.service.EmployeeService;
 import co.zero.vogue.service.IncidentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
@@ -21,6 +18,7 @@ import java.util.Random;
  */
 @RestController
 @RequestMapping("/incidents")
+@CrossOrigin(origins = "http://localhost:3000")
 public class IncidentController {
     @Autowired
     IncidentService incidentService;

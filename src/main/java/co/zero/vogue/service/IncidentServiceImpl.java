@@ -6,6 +6,7 @@ import co.zero.vogue.common.SeverityType;
 import co.zero.vogue.model.Incident;
 import co.zero.vogue.persistence.IncidentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,7 +24,8 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public List<Incident> listAll() {
-        Iterable<Incident> incidentIterable = repository.findAll();
+        Sort sort = new Sort(Sort.Direction.DESC, "createdDate");
+        Iterable<Incident> incidentIterable = repository.findAll(sort);
         List<Incident> incidentList = new ArrayList<>();
         incidentIterable.forEach(incidentList :: add);
         return incidentList;
