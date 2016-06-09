@@ -1,6 +1,6 @@
 package co.zero.vogue.model;
 
-import co.zero.vogue.common.RoleType;
+import co.zero.vogue.common.type.RoleType;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -9,9 +9,7 @@ import java.util.Date;
  * Created by htenjo on 5/30/16.
  */
 @Entity
-public class VogueUser {
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+public class VogueUser extends BaseEntity{
     @Column(unique = true, nullable = false)
     private String username;
     private String password;
@@ -27,13 +25,6 @@ public class VogueUser {
     @OneToOne(fetch = FetchType.LAZY, optional = true)
     private Employee employee;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public String getUsername() {
         return username;
