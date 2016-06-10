@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/event")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class EventResource {
     @Autowired
     EventService service;
