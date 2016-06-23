@@ -54,12 +54,13 @@ public class UtilsResource {
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
+        headers.add("Content-Disposition", "inline; filename=clean-" + file.getOriginalFilename());
 
         return ResponseEntity
                 .ok()
                 .headers(headers)
                 .contentLength(byteArrayResource.contentLength())
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .contentType(MediaType.parseMediaType(file.getContentType()))
                 .body(byteArrayResource);
     }
 }
