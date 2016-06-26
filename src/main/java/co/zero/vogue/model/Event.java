@@ -1,6 +1,9 @@
 package co.zero.vogue.model;
 
+import co.zero.vogue.common.type.ClassType;
 import co.zero.vogue.common.type.EventType;
+import co.zero.vogue.common.type.ProbabilityType;
+import co.zero.vogue.common.type.SeverityType;
 import co.zero.vogue.common.view.View;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -16,11 +19,18 @@ import java.util.Date;
 public class Event extends BaseEntity{
     /** This is a kind of id given by an external system */
     @JsonView(View.Summary.class)
+    @Column(unique = true)
     private String sio;
 
     @Enumerated(value = EnumType.STRING)
     @JsonView(View.Summary.class)
     private EventType eventType;
+
+    @ManyToOne
+    private Employee collaborator;
+
+    @ManyToOne
+    private Area area;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @JsonView(View.Summary.class)
@@ -29,12 +39,30 @@ public class Event extends BaseEntity{
     @JsonView(View.Summary.class)
     private String description;
 
-    @ManyToOne
-    private Area area;
+    private String measures;
 
-    @ManyToOne
-    private Employee supervisor;
+    @Enumerated(value = EnumType.STRING)
+    private SeverityType severity;
 
+    @Enumerated(value = EnumType.STRING)
+    private ProbabilityType probability;
+
+    public Event() {
+    }
+
+    public Event(String sio, EventType eventType, Employee collaborator, Area area
+            , Date createdDate, String description, String measures , SeverityType severity
+            , ProbabilityType probability) {
+        this.sio = sio;
+        this.eventType = eventType;
+        this.collaborator = collaborator;
+        this.area = area;
+        this.createdDate = createdDate;
+        this.description = description;
+        this.measures = measures;
+        this.severity = severity;
+        this.probability = probability;
+    }
 
     public String getSio() {
         return sio;
@@ -76,11 +104,8 @@ public class Event extends BaseEntity{
         this.description = description;
     }
 
-    public Employee getSupervisor() {
-        return supervisor;
-    }
-
-    public void setSupervisor(Employee supervisor) {
-        this.supervisor = supervisor;
+    @Transient
+    public ClassType getClassType(){
+        return null;
     }
 }

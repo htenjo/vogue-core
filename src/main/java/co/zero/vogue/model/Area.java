@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Area extends BaseEntity{
+    @Column(unique = true)
     private String name;
 
     public String getName() {

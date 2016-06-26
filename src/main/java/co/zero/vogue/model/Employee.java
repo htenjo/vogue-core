@@ -11,27 +11,20 @@ import javax.persistence.*;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Employee extends BaseEntity{
-    private String firstName;
-    private String lastName;
-    private String email;
-    private boolean boss;
     @ManyToOne
     private Area area;
+    @Column(unique = true)
+    private String name;
+    @Column(unique = true)
+    private String email;
 
-    public String getFirstName() {
-        return firstName;
+    //TODO: Think about lomboz to delete this boilerplate code
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -48,13 +41,5 @@ public class Employee extends BaseEntity{
 
     public void setArea(Area area) {
         this.area = area;
-    }
-
-    public boolean isBoss() {
-        return boss;
-    }
-
-    public void setBoss(boolean boss) {
-        this.boss = boss;
     }
 }
