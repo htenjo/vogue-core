@@ -11,6 +11,7 @@ import co.zero.vogue.model.Task;
 import co.zero.vogue.persistence.AreaRepository;
 import co.zero.vogue.persistence.EmployeeRepository;
 import co.zero.vogue.persistence.EventRepository;
+import co.zero.vogue.persistence.TaskRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.function.Function;
 
 /**
  * Created by htenjo on 6/2/16.
@@ -34,10 +36,13 @@ public class EventServiceImpl implements EventService {
     private static final int CREATED_DATE_COLUMN_INDEX = 4;
     private static final int DESCRIPTION_COLUMN_INDEX = 5;
     private static final int MEASURES_COLUMN_INDEX = 6;
-    private static final int TASKS_COLUMN_INDEX = 7;
-    private static final int RESPONSIBLE_COLUMN_INDEX = 8;
+    private static final int TASK_DESCRIPTION_COLUMN_INDEX = 7;
+    private static final int TASK_RESPONSIBLE_COLUMN_INDEX = 8;
     private static final int SEVERITY_COLUMN_INDEX = 9;
     private static final int PROBABILITY_COLUMN_INDEX = 10;
+    private static final int TASK_PERCENTAGE_COLUMN_INDEX = 12;
+    private static final int TASK_CLOSED_DATE_COLUMN_INDEX = 13;
+    private static final int TASK_COMMENTS_COLUMN_INDEX = 14;
 
     @Autowired
     EventRepository eventRepository;
@@ -47,6 +52,9 @@ public class EventServiceImpl implements EventService {
 
     @Autowired
     AreaRepository areaRepository;
+
+    @Autowired
+    TaskRepository taskRepository;
 
     @Override
     public Page<Event> list(Pageable pageable) {
@@ -78,9 +86,7 @@ public class EventServiceImpl implements EventService {
 
             if(validateRow(currentRow)){
                 Event event = buildEventFromRow(currentRow);
-                //TODO: Implements this logic
-                //1. If event exist then just create the new task
-                String task = currentRow.getCell(TASKS_COLUMN_INDEX).getStringCellValue();
+                buildTaskFromRow(currentRow, event);
             }
         }
     }
@@ -92,23 +98,33 @@ public class EventServiceImpl implements EventService {
         CellStyle errorStyle = ExcelUtils.buildBasicCellStyle(
                 row, IndexedColors.RED.getIndex(), CellStyle.SOLID_FOREGROUND);
 
-        validRow &= validateSIO(row.getCell(SIO_COLUMN_INDEX), validStyle, errorStyle);
-        validRow &= validateType(row.getCell(TYPE_COLUMN_INDEX), validStyle, errorStyle);
-        validRow &= validateCreatedDate(row.getCell(CREATED_DATE_COLUMN_INDEX), validStyle, errorStyle);
-        validRow &= validateSeverity(row.getCell(SEVERITY_COLUMN_INDEX), validStyle, errorStyle);
-        validRow &= validateProbability(row.getCell(PROBABILITY_COLUMN_INDEX), validStyle, errorStyle);
-        validRow &= validateArea(row.getCell(AREA_COLUMN_INDEX), validStyle, errorStyle);
-        validRow &= validateEmployee(row.getCell(COLLABORATOR_COLUMN_INDEX), validStyle, errorStyle);
-        validRow &= validateEmployee(row.getCell(RESPONSIBLE_COLUMN_INDEX), validStyle, errorStyle);
+        validRow &= validateCell(row.getCell(SIO_COLUMN_INDEX), validStyle, errorStyle, this::getSIO);
+        validRow &= validateCell(row.getCell(TYPE_COLUMN_INDEX), validStyle, errorStyle, this::getEventTypeFromCell);
+        validRow &= validateCell(row.getCell(CREATED_DATE_COLUMN_INDEX), validStyle, errorStyle, this::getCreatedDateFromCell);
+        validRow &= validateCell(row.getCell(SEVERITY_COLUMN_INDEX), validStyle, errorStyle, this::getSeverityTypeFromCell);
+        validRow &= validateCell(row.getCell(PROBABILITY_COLUMN_INDEX), validStyle, errorStyle, this::getProbabilityTypeFromCell);
+        validRow &= validateCell(row.getCell(AREA_COLUMN_INDEX), validStyle, errorStyle, this::getAreaFromCell);
+        validRow &= validateCell(row.getCell(COLLABORATOR_COLUMN_INDEX), validStyle, errorStyle, this::getEmployeeFromCell);
+        validRow &= validateCell(row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX), validStyle, errorStyle, this::getEmployeeFromCell);
         return validRow;
     }
 
+    private boolean validateCell(Cell cell, CellStyle validStyle, CellStyle errorStyle, Function<Cell, Object> function){
+        try{
+            function.apply(cell);
+            cell.setCellStyle(validStyle);
+            return true;
+        }catch (IllegalArgumentException e){
+            cell.setCellStyle(errorStyle);
+            return false;
+        }
+    }
+
     private Event buildEventFromRow(Row row){
-        Event event;
         String sio = getSIO(row.getCell(SIO_COLUMN_INDEX));
 
         if(eventRepository.existBySio(sio)){
-            event = eventRepository.findFirstBySio(sio);
+            return eventRepository.findFirstBySio(sio);
         }else{
             EventType type = getEventTypeFromCell(row.getCell(TYPE_COLUMN_INDEX));
             Employee collaborator = getEmployeeFromCell(row.getCell(COLLABORATOR_COLUMN_INDEX));
@@ -118,101 +134,28 @@ public class EventServiceImpl implements EventService {
             String measures = row.getCell(MEASURES_COLUMN_INDEX).getStringCellValue();
             SeverityType severity = getSeverityTypeFromCell(row.getCell(SEVERITY_COLUMN_INDEX));
             ProbabilityType probability = getProbabilityTypeFromCell(row.getCell(PROBABILITY_COLUMN_INDEX));
-            event = new Event(sio, type, collaborator, area, createdDate, description,
+            Event event = new Event(sio, type, collaborator, area, createdDate, description,
                     measures, severity, probability);
+            return eventRepository.save(event);
         }
-
-        return event;
     }
 
     private Task buildTaskFromRow(Row row, Event event){
+        String description = ExcelUtils.getCellStringValue(row.getCell(TASK_DESCRIPTION_COLUMN_INDEX));
+        double percentage = ExcelUtils.getCellNumericValue(row.getCell(TASK_PERCENTAGE_COLUMN_INDEX));
+        Date closedDate = ExcelUtils.getCellDateValue(row.getCell(TASK_CLOSED_DATE_COLUMN_INDEX));
+        String comments = ExcelUtils.getCellStringValue(row.getCell(TASK_COMMENTS_COLUMN_INDEX));
+        Employee responsable = getEmployeeFromCell(row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX));
+
         Task task = new Task();
+        task.setDescription(description);
+        task.setCreatedDate(event.getCreatedDate());
+        task.setPercentageCompleted(percentage);
+        task.setResponsible(responsable);
+        task.setExpectedClosedDate(closedDate);
+        task.setClosedComments(comments);
         task.setEvent(event);
-        task.setCreatedDate(new Date());
-        task.setPercentageCompleted(0);
-        task.setResponsible(null);
-        task.setExpectedClosedDate();
-        return task;
-    }
-
-    //TODO: Think a better way the help to simplify this amount of similar methods... maybe a lambda
-    private boolean validateSIO(Cell cell, CellStyle validStyle, CellStyle errorStyle){
-        try{
-            getSIO(cell);
-            cell.setCellStyle(validStyle);
-            return true;
-        }catch (IllegalArgumentException e){
-            cell.setCellStyle(errorStyle);
-            return false;
-        }
-    }
-
-    private boolean validateType(Cell cell, CellStyle validStyle, CellStyle errorStyle){
-        try{
-            getEventTypeFromCell(cell);
-            cell.setCellStyle(validStyle);
-            return true;
-        }catch (IllegalArgumentException e){
-            cell.setCellStyle(errorStyle);
-            return false;
-        }
-    }
-
-    private boolean validateCreatedDate(Cell cell, CellStyle validStyle, CellStyle errorStyle) {
-        try {
-            getCreatedDateFromCell(cell);
-            cell.setCellStyle(validStyle);
-            return true;
-        } catch (IllegalArgumentException e) {
-            cell.setCellStyle(errorStyle);
-            return false;
-        }
-    }
-
-    private boolean validateSeverity(Cell cell, CellStyle validStyle, CellStyle errorStyle){
-        try{
-            getSeverityTypeFromCell(cell);
-            cell.setCellStyle(validStyle);
-            return true;
-        }catch (IllegalArgumentException e){
-            cell.setCellStyle(errorStyle);
-            return false;
-        }
-    }
-
-    private boolean validateProbability(Cell cell, CellStyle validStyle, CellStyle errorStyle){
-        try{
-            getProbabilityTypeFromCell(cell);
-            cell.setCellStyle(validStyle);
-            return true;
-        }catch (IllegalArgumentException e){
-            cell.setCellStyle(errorStyle);
-            return false;
-        }
-    }
-
-    //TODO: Think a better way to know if a employee exist without retrieve the employee
-    private boolean validateEmployee(Cell cell, CellStyle validStyle, CellStyle errorStyle){
-        try{
-            getEmployeeFromCell(cell);
-            cell.setCellStyle(validStyle);
-            return true;
-        }catch (IllegalArgumentException e){
-            cell.setCellStyle(errorStyle);
-            return false;
-        }
-    }
-
-    //TODO: Think a better way to know if a employee exist without retrieve the employee
-    private boolean validateArea(Cell cell, CellStyle validStyle, CellStyle errorStyle){
-        try{
-            getAreaFromCell(cell);
-            cell.setCellStyle(validStyle);
-            return true;
-        }catch (IllegalArgumentException e){
-            cell.setCellStyle(errorStyle);
-            return false;
-        }
+        return taskRepository.save(task);
     }
 
     private String getSIO(Cell cell){
@@ -223,14 +166,14 @@ public class EventServiceImpl implements EventService {
         }else if(value instanceof String && StringUtils.isNumeric((String)value)){
             return (String) value;
         }else{
-            throw new IllegalArgumentException("SIO should be Number or String");
+            throw new IllegalArgumentException("SIO should be a Number");
         }
     }
 
     private EventType getEventTypeFromCell(Cell cell){
         try{
-            Object value = ExcelUtils.getCellValue(cell);
-            return EventType.valueOf((String) value);
+            String value = ExcelUtils.getCellStringValue(cell);
+            return EventType.valueOf(value);
         }catch(NullPointerException e){
             throw new IllegalArgumentException(e);
         }
@@ -238,8 +181,8 @@ public class EventServiceImpl implements EventService {
 
     private SeverityType getSeverityTypeFromCell(Cell cell){
         try{
-            Object value = ExcelUtils.getCellValue(cell);
-            return SeverityType.valueOf((String) value);
+            String value = ExcelUtils.getCellStringValue(cell);
+            return SeverityType.valueOf(value);
         }catch(NullPointerException e){
             throw new IllegalArgumentException(e);
         }
@@ -247,56 +190,34 @@ public class EventServiceImpl implements EventService {
 
     private ProbabilityType getProbabilityTypeFromCell(Cell cell){
         try{
-            Object value = ExcelUtils.getCellValue(cell);
-            return ProbabilityType.valueOf((String) value);
+            String value = ExcelUtils.getCellStringValue(cell);
+            return ProbabilityType.valueOf(value);
         }catch(NullPointerException e){
             throw new IllegalArgumentException(e);
         }
     }
 
     private Date getCreatedDateFromCell(Cell cell){
-        Object value = ExcelUtils.getCellValue(cell);
-
-        if(value instanceof Date){
-            return (Date) value;
-        }else{
-            throw new IllegalArgumentException("Invalid date value in cell createdDate");
-        }
+        return ExcelUtils.getCellDateValue(cell);
     }
 
     private Employee getEmployeeFromCell(Cell cell){
-        Object value = ExcelUtils.getCellValue(cell);
-        String employeeName;
+        String employeeName = ExcelUtils.getCellStringValue(cell);
 
-        if(value instanceof String){
-            employeeName = (String) value;
-
-            if(employeeRepository.existByName(employeeName)){
-                return employeeRepository.findFirstByNameIgnoreCase(employeeName);
-            }else{
-                throw new IllegalArgumentException("Employee not found by name");
-            }
+        if(employeeRepository.existByName(employeeName)){
+            return employeeRepository.findFirstByNameIgnoreCase(employeeName);
         }else{
-            throw new IllegalArgumentException("Employee name should be a String");
+            throw new IllegalArgumentException("Employee not found by name");
         }
-
     }
 
     private Area getAreaFromCell(Cell cell){
-        Object value = ExcelUtils.getCellValue(cell);
-        String areaName;
+        String areaName = ExcelUtils.getCellStringValue(cell);
 
-        if(value instanceof String){
-            areaName = (String) value;
-
-            if(areaRepository.existByName(areaName)){
-                return areaRepository.findFirstByNameOrderByNameAsc(areaName);
-            }else{
-                throw new IllegalArgumentException("Employee not found by name");
-            }
+        if(areaRepository.existByName(areaName)){
+            return areaRepository.findFirstByNameOrderByNameAsc(areaName);
         }else{
-            throw new IllegalArgumentException("Employee name should be a String");
+            throw new IllegalArgumentException("Area not found by name");
         }
-
     }
 }

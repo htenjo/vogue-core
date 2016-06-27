@@ -14,6 +14,7 @@ import java.util.Date;
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Task extends BaseEntity{
+    private String description;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date createdDate;
@@ -31,6 +32,14 @@ public class Task extends BaseEntity{
 
     private String closedComments;
 
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Employee getResponsible() {
         return responsible;
