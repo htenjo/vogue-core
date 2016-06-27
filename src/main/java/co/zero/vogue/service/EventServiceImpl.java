@@ -14,6 +14,7 @@ import co.zero.vogue.persistence.EventRepository;
 import co.zero.vogue.persistence.TaskRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +43,8 @@ public class EventServiceImpl implements EventService {
     private static final int PROBABILITY_COLUMN_INDEX = 10;
     private static final int TASK_PERCENTAGE_COLUMN_INDEX = 12;
     private static final int TASK_CLOSED_DATE_COLUMN_INDEX = 13;
-    private static final int TASK_COMMENTS_COLUMN_INDEX = 14;
+    private static final int TASK_COMMENTS_COLUMN_INDEX = 15;
+    private static final int VALID_ROW_COLUMN_INDEX = 16;
 
     @Autowired
     EventRepository eventRepository;
@@ -106,6 +108,15 @@ public class EventServiceImpl implements EventService {
         validRow &= validateCell(row.getCell(AREA_COLUMN_INDEX), validStyle, errorStyle, this::getAreaFromCell);
         validRow &= validateCell(row.getCell(COLLABORATOR_COLUMN_INDEX), validStyle, errorStyle, this::getEmployeeFromCell);
         validRow &= validateCell(row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX), validStyle, errorStyle, this::getEmployeeFromCell);
+        validRow &= validateCell(row.getCell(DESCRIPTION_COLUMN_INDEX), validStyle, errorStyle, this::getRequiredString);
+        validRow &= validateCell(row.getCell(TASK_DESCRIPTION_COLUMN_INDEX), validStyle, errorStyle, this::getRequiredString);
+
+        if(validRow){
+            row.createCell(VALID_ROW_COLUMN_INDEX).setCellStyle(validStyle);
+        }else{
+            row.createCell(VALID_ROW_COLUMN_INDEX).setCellStyle(errorStyle);
+        }
+
         return validRow;
     }
 
@@ -145,13 +156,13 @@ public class EventServiceImpl implements EventService {
         double percentage = ExcelUtils.getCellNumericValue(row.getCell(TASK_PERCENTAGE_COLUMN_INDEX));
         Date closedDate = ExcelUtils.getCellDateValue(row.getCell(TASK_CLOSED_DATE_COLUMN_INDEX));
         String comments = ExcelUtils.getCellStringValue(row.getCell(TASK_COMMENTS_COLUMN_INDEX));
-        Employee responsable = getEmployeeFromCell(row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX));
+        Employee responsible = getEmployeeFromCell(row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX));
 
         Task task = new Task();
         task.setDescription(description);
         task.setCreatedDate(event.getCreatedDate());
         task.setPercentageCompleted(percentage);
-        task.setResponsible(responsable);
+        task.setResponsible(responsible);
         task.setExpectedClosedDate(closedDate);
         task.setClosedComments(comments);
         task.setEvent(event);
@@ -199,6 +210,16 @@ public class EventServiceImpl implements EventService {
 
     private Date getCreatedDateFromCell(Cell cell){
         return ExcelUtils.getCellDateValue(cell);
+    }
+
+    private String getRequiredString(Cell cell){
+        String value = ExcelUtils.getCellStringValue(cell);
+
+        if(StringUtils.isBlank(value)){
+            throw new IllegalArgumentException("Required field empty");
+        }else{
+            return value;
+        }
     }
 
     private Employee getEmployeeFromCell(Cell cell){

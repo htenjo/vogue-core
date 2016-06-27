@@ -104,6 +104,38 @@ public class Event extends BaseEntity{
         this.description = description;
     }
 
+    public Employee getCollaborator() {
+        return collaborator;
+    }
+
+    public void setCollaborator(Employee collaborator) {
+        this.collaborator = collaborator;
+    }
+
+    public String getMeasures() {
+        return measures;
+    }
+
+    public void setMeasures(String measures) {
+        this.measures = measures;
+    }
+
+    public SeverityType getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(SeverityType severity) {
+        this.severity = severity;
+    }
+
+    public ProbabilityType getProbability() {
+        return probability;
+    }
+
+    public void setProbability(ProbabilityType probability) {
+        this.probability = probability;
+    }
+
     @Transient
     public ClassType getClassType(){
         return null;
