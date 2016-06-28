@@ -13,4 +13,5 @@ public interface EmployeeService {
     public Page<Employee> list(Pageable pageable);
     public Employee save(Employee employee);
     public Employee find(long id);
+    public Employee findByName(String name);
 }
