@@ -59,6 +59,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public void deleteAll() {
+        taskRepository.deleteAll();
+        eventRepository.deleteAll();
+    }
+
+    @Override
     public void bulkLoad(Workbook workbook) {
         Sheet sheet = workbook.getSheetAt(DEFAULT_SHEET_INDEX);
         int lastRowIndex = sheet.getLastRowNum();

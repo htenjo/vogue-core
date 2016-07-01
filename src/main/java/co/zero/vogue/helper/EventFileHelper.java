@@ -11,6 +11,7 @@ import co.zero.vogue.model.Task;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 
+import javax.xml.crypto.Data;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -138,25 +139,31 @@ public class EventFileHelper {
 
     private void validateRow(Row row){
         validRow = true;
-        validRow &= validateCell(row.getCell(SIO_COLUMN_INDEX), this::getSIOFromCell, validStyle, errorStyle);
-        validRow &= validateCell(row.getCell(TYPE_COLUMN_INDEX), this::getEventTypeFromCell, validStyle, errorStyle);
+        validRow &= validateCell(row, SIO_COLUMN_INDEX, this::getSIOFromCell, validStyle, errorStyle);
+        validRow &= validateCell(row, TYPE_COLUMN_INDEX, this::getEventTypeFromCell, validStyle, errorStyle);
         validRow &= validateCollaborator(row.getCell(COLLABORATOR_COLUMN_INDEX));
         validRow &= validateArea(row.getCell(AREA_COLUMN_INDEX));
-        validRow &= validateCell(row.getCell(CREATED_DATE_COLUMN_INDEX), this::getCreatedDateFromCell, validDateStyle, errorDateStyle);
-        validRow &= validateCell(row.getCell(DESCRIPTION_COLUMN_INDEX), this::getRequiredString, validStyle, errorStyle);
-        validRow &= validateCell(row.getCell(TASK_DESCRIPTION_COLUMN_INDEX), this::getRequiredString, validStyle, errorStyle);
+        validRow &= validateCell(row, CREATED_DATE_COLUMN_INDEX, this::getCreatedDateFromCell, validDateStyle, errorDateStyle);
+        validRow &= validateCell(row, DESCRIPTION_COLUMN_INDEX, this::getRequiredString, validStyle, errorStyle);
+        validRow &= validateCell(row, TASK_DESCRIPTION_COLUMN_INDEX, this::getRequiredString, validStyle, errorStyle);
         validRow &= validateResponsible(row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX));
-        validRow &= validateCell(row.getCell(SEVERITY_COLUMN_INDEX), this::getSeverityTypeFromCell, validStyle, errorStyle);
-        validRow &= validateCell(row.getCell(PROBABILITY_COLUMN_INDEX), this::getProbabilityTypeFromCell, validStyle, errorStyle);
+        validRow &= validateCell(row, SEVERITY_COLUMN_INDEX, this::getSeverityTypeFromCell, validStyle, errorStyle);
+        validRow &= validateCell(row, PROBABILITY_COLUMN_INDEX, this::getProbabilityTypeFromCell, validStyle, errorStyle);
         setRowValidationResult();
     }
 
-    private boolean validateCell(Cell cell, Function<Cell, Object> function, CellStyle validStyle, CellStyle errorStyle){
+    private boolean validateCell(Row row, int cellIndex, Function<Cell, Object> function, CellStyle validStyle, CellStyle errorStyle){
+        Cell cell = row.getCell(cellIndex);
+
         try{
             function.apply(cell);
             cell.setCellStyle(validStyle);
             return true;
         }catch (IllegalArgumentException e){
+            cell.setCellStyle(errorStyle);
+            return false;
+        }catch (NullPointerException e){
+            cell = row.createCell(cellIndex);
             cell.setCellStyle(errorStyle);
             return false;
         }
@@ -168,7 +175,7 @@ public class EventFileHelper {
         try{
             collaborator = getEmployeeFromCell(collaboratorCell, collaboratorValidator);
             validCollaborator = collaborator != null;
-        }catch(IllegalArgumentException e){
+        }catch(IllegalArgumentException | NullPointerException e){
             validCollaborator = false;
         }
 
@@ -182,7 +189,7 @@ public class EventFileHelper {
         try{
             responsible = getEmployeeFromCell(responsibleCell, responsibleValidator);
             validResponsible = responsible != null;
-        }catch(IllegalArgumentException e){
+        }catch(IllegalArgumentException | NullPointerException e){
             validResponsible = false;
         }
 
@@ -223,11 +230,10 @@ public class EventFileHelper {
 
     private String getSIOFromCell(Cell cell){
         Object value = ExcelUtils.getCellValue(cell);
+        DataFormatter formatter = new DataFormatter();
 
-        if(value instanceof Number){
-            return value.toString();
-        }else if(value instanceof String && StringUtils.isNumeric((String)value)){
-            return (String) value;
+        if(value instanceof Number || (value instanceof String && StringUtils.isNumeric((String)value))){
+            return formatter.formatCellValue(cell);
         }else{
             throw new IllegalArgumentException("SIO should be a Number");
         }
@@ -235,7 +241,7 @@ public class EventFileHelper {
 
     private EventType getEventTypeFromCell(Cell cell){
         try{
-            String value = ExcelUtils.getCellStringValue(cell);
+            String value = ExcelUtils.getCellStringValueNoSpaces(cell);
             return EventType.valueOf(value);
         }catch(NullPointerException e){
             throw new IllegalArgumentException(e);
@@ -244,7 +250,7 @@ public class EventFileHelper {
 
     private SeverityType getSeverityTypeFromCell(Cell cell){
         try{
-            String value = ExcelUtils.getCellStringValue(cell);
+            String value = ExcelUtils.getCellStringValueNoSpaces(cell);
             return SeverityType.valueOf(value);
         }catch(NullPointerException e){
             throw new IllegalArgumentException(e);
@@ -253,7 +259,7 @@ public class EventFileHelper {
 
     private ProbabilityType getProbabilityTypeFromCell(Cell cell){
         try{
-            String value = ExcelUtils.getCellStringValue(cell);
+            String value = ExcelUtils.getCellStringValueNoSpaces(cell);
             return ProbabilityType.valueOf(value);
         }catch(NullPointerException e){
             throw new IllegalArgumentException(e);
@@ -265,7 +271,7 @@ public class EventFileHelper {
     }
 
     private String getRequiredString(Cell cell){
-        String value = ExcelUtils.getCellStringValue(cell);
+        String value = ExcelUtils.getCellStringValueNoSpaces(cell);
 
         if(StringUtils.isBlank(value)){
             throw new IllegalArgumentException("Required field empty");
@@ -275,7 +281,7 @@ public class EventFileHelper {
     }
 
     private String getStringValueFromCell(Cell cell){
-        return ExcelUtils.getCellStringValue(cell);
+        return ExcelUtils.getCellStringValueNoSpaces(cell);
     }
 
     private Date getDateValueFromCell(Cell cell){

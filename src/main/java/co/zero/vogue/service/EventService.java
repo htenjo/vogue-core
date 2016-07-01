@@ -16,4 +16,5 @@ public interface EventService {
     public Event save(Event event);
     public Event update(Event event);
     public void bulkLoad(Workbook workbook);
+    public void deleteAll();
 }

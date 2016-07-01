@@ -69,4 +69,10 @@ public class EventResource {
                 .contentType(MediaType.parseMediaType(file.getContentType()))
                 .body(byteArrayResource);
     }
+
+    @RequestMapping(value = "/all", method = RequestMethod.DELETE)
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteAll(){
+        service.deleteAll();
+    }
 }
