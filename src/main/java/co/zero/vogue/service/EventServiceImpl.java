@@ -67,8 +67,9 @@ public class EventServiceImpl implements EventService {
         EventFileHelper fileHelper = new EventFileHelper(employeeValidator, employeeValidator, areaValidator);
 
         for (int rowIndex = DEFAULT_START_ROW_INDEX; rowIndex <= lastRowIndex; rowIndex++) {
-            System.out.println(":::: Row to prcess = " + rowIndex);
+            System.out.println(":::: Row to process = " + rowIndex);
             Row currentRow = sheet.getRow(rowIndex);
+            System.out.println(ExcelUtils.rowToString(currentRow));
             fileHelper.processRow(currentRow);
 
             if(fileHelper.isValidRow()){

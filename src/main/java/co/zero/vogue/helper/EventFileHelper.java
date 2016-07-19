@@ -155,9 +155,11 @@ public class EventFileHelper {
         try{
             function.apply(cell);
             cell.setCellStyle(validStyle);
+            System.out.println("Cell " + cell.getColumnIndex() + " is VALID");
             return true;
         }catch (IllegalArgumentException e){
             cell.setCellStyle(errorStyle);
+            System.out.println("Cell " + cell.getColumnIndex() + " is INVALID");
             return false;
         }
     }
@@ -173,6 +175,7 @@ public class EventFileHelper {
         }
 
         applyValidationStyleToEntityCell(validCollaborator, collaboratorCell);
+        System.out.println("Cell " + collaboratorCell.getColumnIndex() + " is " + (validCollaborator ? "VALID" : "INVALID"));
         return validCollaborator;
     }
 
@@ -187,6 +190,7 @@ public class EventFileHelper {
         }
 
         applyValidationStyleToEntityCell(validResponsible, responsibleCell);
+        System.out.println("Cell " + responsibleCell.getColumnIndex() + " is " + (validResponsible ? "VALID" : "X-INVALID"));
         return validResponsible;
     }
 
@@ -211,6 +215,15 @@ public class EventFileHelper {
     }
 
     private void applyValidationStyleToEntityCell(boolean validEntity, Cell entityCell){
+        validStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.LIGHT_GREEN.getIndex(), CellStyle.SOLID_FOREGROUND);
+        errorStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.RED.getIndex(), CellStyle.SOLID_FOREGROUND);
+
+        DataFormat dataFormat = row.getSheet().getWorkbook().createDataFormat();
+        validDateStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.LIGHT_GREEN.getIndex(), CellStyle.SOLID_FOREGROUND);
+        validDateStyle.setDataFormat(dataFormat.getFormat("yyyy-MM-dd"));
+        errorDateStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.RED.getIndex(), CellStyle.SOLID_FOREGROUND);
+
+
         if(validEntity){
             entityCell.getCellStyle().setFillForegroundColor(validStyle.getFillForegroundColor());
             entityCell.getCellStyle().setFillPattern(validStyle.getFillPattern());
