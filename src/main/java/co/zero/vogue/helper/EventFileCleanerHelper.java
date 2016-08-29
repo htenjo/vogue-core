@@ -71,7 +71,6 @@ public class EventFileCleanerHelper extends EventHelper{
     private void writeInfoToCleanSheet(Sheet cleanSheet, int rowIndex, String[] info){
         Row row = cleanSheet.createRow(rowIndex);
         writeNumericValue(row, SIO_COLUMN_INDEX, info[SIO_COLUMN_INDEX]);
-        //row.createCell(SIO_COLUMN_INDEX).setCellValue(info[SIO_COLUMN_INDEX]);
         row.createCell(TYPE_COLUMN_INDEX).setCellValue(info[TYPE_COLUMN_INDEX]);
         row.createCell(COLLABORATOR_COLUMN_INDEX).setCellValue(info[COLLABORATOR_COLUMN_INDEX]);
         row.createCell(AREA_COLUMN_INDEX).setCellValue(info[AREA_COLUMN_INDEX]);
@@ -158,14 +157,30 @@ public class EventFileCleanerHelper extends EventHelper{
         }
     }
 
+    /**
+     *
+     * @param row
+     * @param cellIndex
+     * @param number
+     */
     protected void writeNumericValue(Row row, int cellIndex, String number){
+        cell = row.createCell(cellIndex);
+
         if(number == null){
             cell.setCellStyle(errorCellStyle);
         }else{
-            cell.setCellValue(Double.pa);
+            try{
+                cell.setCellValue(Double.parseDouble(number));
+            }catch(NumberFormatException e){
+                cell.setCellStyle(errorCellStyle);
+            }
         }
     }
 
+    /**
+     *
+     * @param sheet
+     */
     private void initStyles(Sheet sheet){
         if(errorCellStyle == null){
             errorCellStyle = ExcelUtils.buildBasicCellStyle(sheet, IndexedColors.RED.getIndex(), CellStyle.SOLID_FOREGROUND);
