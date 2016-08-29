@@ -18,42 +18,7 @@ import java.util.function.Function;
 /**
  * Created by htenjo on 6/28/16.
  */
-public class EventFileHelper {
-    //Column index in excel file
-    private static final int SIO_COLUMN_INDEX = 0;
-    private static final int TYPE_COLUMN_INDEX = 1;
-    private static final int COLLABORATOR_COLUMN_INDEX = 2;
-    private static final int AREA_COLUMN_INDEX = 3;
-    private static final int CREATED_DATE_COLUMN_INDEX = 4;
-    private static final int DESCRIPTION_COLUMN_INDEX = 5;
-    private static final int MEASURES_COLUMN_INDEX = 6;
-    private static final int TASK_DESCRIPTION_COLUMN_INDEX = 7;
-    private static final int TASK_RESPONSIBLE_COLUMN_INDEX = 8;
-    private static final int SEVERITY_COLUMN_INDEX = 9;
-    private static final int PROBABILITY_COLUMN_INDEX = 10;
-    private static final int TASK_PERCENTAGE_COLUMN_INDEX = 12;
-    private static final int TASK_CLOSED_DATE_COLUMN_INDEX = 13;
-    private static final int TASK_COMMENTS_COLUMN_INDEX = 15;
-    private static final int VALID_ROW_COLUMN_INDEX = 16;
-
-    //Default attributes in the excel
-    private String sio;
-    private EventType type;
-    private Date createdDate;
-    private String description;
-    private String measures;
-    private String taskDescription;
-    private SeverityType severityType;
-    private ProbabilityType probabilityType;
-    private double taskPercentage;
-    private Date taskClosedDate;
-    private String taskComments;
-    private Employee collaborator;
-    private Employee responsible;
-    private Area area;
-
-    //Helper attributes
-    private Row row;
+public class EventFileProcessingHelper extends EventHelper{
     private boolean validRow;
     private CellStyle validStyle;
     private CellStyle errorStyle;
@@ -69,14 +34,18 @@ public class EventFileHelper {
      * @param responsibleValidator function that can find responsible by name
      * @param areaValidator function that can find area by name
      */
-    public EventFileHelper(Function<String, Employee> collaboratorValidator,
-                           Function<String, Employee> responsibleValidator,
-                           Function<String, Area> areaValidator) {
+    public EventFileProcessingHelper(Function<String, Employee> collaboratorValidator,
+                                     Function<String, Employee> responsibleValidator,
+                                     Function<String, Area> areaValidator) {
         this.collaboratorValidator = collaboratorValidator;
         this.responsibleValidator = responsibleValidator;
         this.areaValidator = areaValidator;
     }
 
+    /**
+     *
+     * @param row
+     */
     public void processRow(Row row){
         this.row = row;
         initStyles();
@@ -84,6 +53,10 @@ public class EventFileHelper {
         initAttributes();
     }
 
+    /**
+     *
+     * @return
+     */
     public Event buildEventFromRow(){
         if(validRow){
             return new Event(sio, type, collaborator, area, createdDate, description,
@@ -93,6 +66,11 @@ public class EventFileHelper {
         }
     }
 
+    /**
+     *
+     * @param event
+     * @return
+     */
     public Task buildTaskFromRow(Event event){
         if(validRow && event != null && event.getId() != null){
             Task task = new Task();
@@ -109,6 +87,9 @@ public class EventFileHelper {
         }
     }
 
+    /**
+     *
+     */
     private void initAttributes(){
         if(isValidRow()){
             sio = getSIOFromCell(row.getCell(SIO_COLUMN_INDEX));
@@ -125,6 +106,9 @@ public class EventFileHelper {
         }
     }
 
+    /**
+     *
+     */
     private void initStyles(){
         if(validStyle == null){
             validStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.LIGHT_GREEN.getIndex(), CellStyle.SOLID_FOREGROUND);
@@ -137,6 +121,10 @@ public class EventFileHelper {
         }
     }
 
+    /**
+     *
+     * @param row
+     */
     private void validateRow(Row row){
         validRow = true;
         validRow &= validateCell(row, SIO_COLUMN_INDEX, this::getSIOFromCell, validStyle, errorStyle);
@@ -152,6 +140,15 @@ public class EventFileHelper {
         setRowValidationResult();
     }
 
+    /**
+     *
+     * @param row
+     * @param cellIndex
+     * @param function
+     * @param validStyle
+     * @param errorStyle
+     * @return
+     */
     private boolean validateCell(Row row, int cellIndex, Function<Cell, Object> function, CellStyle validStyle, CellStyle errorStyle){
         Cell cell = row.getCell(cellIndex);
 
@@ -169,6 +166,11 @@ public class EventFileHelper {
         }
     }
 
+    /**
+     *
+     * @param collaboratorCell
+     * @return
+     */
     private boolean validateCollaborator(Cell collaboratorCell){
         boolean validCollaborator;
 
@@ -183,6 +185,11 @@ public class EventFileHelper {
         return validCollaborator;
     }
 
+    /**
+     *
+     * @param responsibleCell
+     * @return
+     */
     private boolean validateResponsible(Cell responsibleCell){
         boolean validResponsible;
 
@@ -197,11 +204,22 @@ public class EventFileHelper {
         return validResponsible;
     }
 
+    /**
+     *
+     * @param cell
+     * @param validator
+     * @return
+     */
     private Employee getEmployeeFromCell(Cell cell, Function<String, Employee> validator){
         String employeeName = getRequiredString(cell);
         return validator.apply(employeeName);
     }
 
+    /**
+     *
+     * @param areaCell
+     * @return
+     */
     private boolean validateArea(Cell areaCell){
         boolean validArea;
 
@@ -217,6 +235,11 @@ public class EventFileHelper {
         return validArea;
     }
 
+    /**
+     *
+     * @param validEntity
+     * @param entityCell
+     */
     private void applyValidationStyleToEntityCell(boolean validEntity, Cell entityCell){
         if(validEntity){
             entityCell.getCellStyle().setFillForegroundColor(validStyle.getFillForegroundColor());
@@ -228,82 +251,9 @@ public class EventFileHelper {
         }
     }
 
-    private String getSIOFromCell(Cell cell){
-        Object value = ExcelUtils.getCellValue(cell);
-        DataFormatter formatter = new DataFormatter();
-
-        if(value instanceof Number || (value instanceof String && StringUtils.isNumeric((String)value))){
-            return formatter.formatCellValue(cell);
-        }else{
-            throw new IllegalArgumentException("SIO should be a Number");
-        }
-    }
-
-    private EventType getEventTypeFromCell(Cell cell){
-        try{
-            String value = ExcelUtils.getCellStringValueNoSpaces(cell);
-            return EventType.valueOf(value);
-        }catch(NullPointerException e){
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    private SeverityType getSeverityTypeFromCell(Cell cell){
-        try{
-            String value = ExcelUtils.getCellStringValueNoSpaces(cell);
-            return SeverityType.valueOf(value);
-        }catch(NullPointerException e){
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    private ProbabilityType getProbabilityTypeFromCell(Cell cell){
-        try{
-            String value = ExcelUtils.getCellStringValueNoSpaces(cell);
-            return ProbabilityType.valueOf(value);
-        }catch(NullPointerException e){
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    private Date getCreatedDateFromCell(Cell cell){
-        return ExcelUtils.getCellDateValue(cell);
-    }
-
-    private String getRequiredString(Cell cell){
-        String value = ExcelUtils.getCellStringValueNoSpaces(cell);
-
-        if(StringUtils.isBlank(value)){
-            throw new IllegalArgumentException("Required field empty");
-        }else{
-            return value;
-        }
-    }
-
-    private String getStringValueFromCell(Cell cell){
-        return ExcelUtils.getCellStringValueNoSpaces(cell);
-    }
-
-    private Date getDateValueFromCell(Cell cell){
-        Object value = ExcelUtils.getCellValue(cell);
-
-        if(value instanceof Date){
-            return (Date) value;
-        }else{
-            return null;
-        }
-    }
-
-    private double getNumericValueFromCell(Cell cell){
-        Object value = ExcelUtils.getCellValue(cell);
-
-        if(value instanceof Double){
-            return (Double) value;
-        }else{
-            return 0;
-        }
-    }
-
+    /**
+     *
+     */
     private void setRowValidationResult(){
         if(row.getCell(VALID_ROW_COLUMN_INDEX) == null){
             row.createCell(VALID_ROW_COLUMN_INDEX);
@@ -316,6 +266,10 @@ public class EventFileHelper {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isValidRow() {
         return validRow;
     }

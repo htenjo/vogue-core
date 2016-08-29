@@ -47,6 +47,14 @@ public class EventResource {
         return new ResponseEntity<>(eventPersisted, HttpStatus.CREATED);
     }
 
+    /**
+     * Massive loader of events
+     * @param file File with the required information to be processed. This file should't
+     *             have combined cells nor cells with special or hidden format.
+     * @return
+     * @throws IOException
+     * @throws InvalidFormatException
+     */
     @RequestMapping(value = "/bulkLoad", method = RequestMethod.POST)
     public ResponseEntity<ByteArrayResource> bulkLoadEvents(
             @RequestParam(value="eventsFile") MultipartFile file) throws IOException, InvalidFormatException {
