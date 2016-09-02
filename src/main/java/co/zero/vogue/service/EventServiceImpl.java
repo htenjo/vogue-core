@@ -81,10 +81,14 @@ public class EventServiceImpl implements EventService {
             fileHelper.processRow(currentRow);
 
             if(fileHelper.isValidRow()){
-                Event event = fileHelper.buildEventFromRow();
-                event = eventRepository.save(event);
-                Task task = fileHelper.buildTaskFromRow(event);
-                taskRepository.save(task);
+                try{
+                    Event event = fileHelper.buildEventFromRow();
+                    event = eventRepository.save(event);
+                    Task task = fileHelper.buildTaskFromRow(event);
+                    taskRepository.save(task);
+                }catch (Exception e){
+                    fileHelper.addRowErrorMessage("Error saving the row in the DB (Maybe the SIO already exist)");
+                }
             }
         }
     }

@@ -9,7 +9,7 @@ import java.util.Date;
  * Created by htenjo on 8/28/16.
  */
 public class EventFileCleanerHelper extends EventHelper{
-    private CellStyle errorCellStyle;
+    private CellStyle warningCellStyle;
     private CellStyle dateCellStyle;
 
     /**
@@ -134,7 +134,7 @@ public class EventFileCleanerHelper extends EventHelper{
         cell = row.createCell(cellIndex);
 
         if(date == null){
-            cell.setCellStyle(errorCellStyle);
+            cell.setCellStyle(warningCellStyle);
         }else{
             cell.setCellValue(date);
             cell.setCellStyle(dateCellStyle);
@@ -151,7 +151,7 @@ public class EventFileCleanerHelper extends EventHelper{
         cell = row.createCell(cellIndex);
 
         if(number == null){
-            cell.setCellStyle(errorCellStyle);
+            cell.setCellStyle(warningCellStyle);
         }else{
             cell.setCellValue(number);
         }
@@ -167,12 +167,12 @@ public class EventFileCleanerHelper extends EventHelper{
         cell = row.createCell(cellIndex);
 
         if(number == null){
-            cell.setCellStyle(errorCellStyle);
+            cell.setCellStyle(warningCellStyle);
         }else{
             try{
                 cell.setCellValue(Double.parseDouble(number));
             }catch(NumberFormatException e){
-                cell.setCellStyle(errorCellStyle);
+                cell.setCellStyle(warningCellStyle);
             }
         }
     }
@@ -182,8 +182,8 @@ public class EventFileCleanerHelper extends EventHelper{
      * @param sheet
      */
     private void initStyles(Sheet sheet){
-        if(errorCellStyle == null){
-            errorCellStyle = ExcelUtils.buildBasicCellStyle(sheet, IndexedColors.RED.getIndex(), CellStyle.SOLID_FOREGROUND);
+        if(warningCellStyle == null){
+            warningCellStyle = ExcelUtils.buildBasicCellStyle(sheet, IndexedColors.ROSE.getIndex(), CellStyle.SOLID_FOREGROUND);
         }
 
         if(dateCellStyle == null){

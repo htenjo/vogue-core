@@ -1,18 +1,12 @@
 package co.zero.vogue.helper;
 
 import co.zero.common.files.ExcelUtils;
-import co.zero.vogue.common.type.EventType;
-import co.zero.vogue.common.type.ProbabilityType;
-import co.zero.vogue.common.type.SeverityType;
 import co.zero.vogue.model.Area;
 import co.zero.vogue.model.Employee;
 import co.zero.vogue.model.Event;
 import co.zero.vogue.model.Task;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 
-import javax.xml.crypto.Data;
-import java.util.Date;
 import java.util.function.Function;
 
 /**
@@ -21,6 +15,7 @@ import java.util.function.Function;
 public class EventFileProcessingHelper extends EventHelper{
     private boolean validRow;
     private CellStyle validStyle;
+    private CellStyle warningStyle;
     private CellStyle errorStyle;
     private CellStyle validDateStyle;
     private CellStyle errorDateStyle;
@@ -89,6 +84,19 @@ public class EventFileProcessingHelper extends EventHelper{
 
     /**
      *
+     * @param message
+     */
+    public void addRowErrorMessage(String message){
+        if(row.getCell(VALID_ROW_COLUMN_INDEX) == null){
+            row.createCell(VALID_ROW_COLUMN_INDEX);
+        }
+
+        row.getCell(VALID_ROW_COLUMN_INDEX).setCellValue(message);
+        row.getCell(VALID_ROW_COLUMN_INDEX).setCellStyle(errorStyle);
+    }
+
+    /**
+     *
      */
     private void initAttributes(){
         if(isValidRow()){
@@ -112,12 +120,13 @@ public class EventFileProcessingHelper extends EventHelper{
     private void initStyles(){
         if(validStyle == null){
             validStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.LIGHT_GREEN.getIndex(), CellStyle.SOLID_FOREGROUND);
+            warningStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.ORANGE.getIndex(), CellStyle.SOLID_FOREGROUND);
             errorStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.RED.getIndex(), CellStyle.SOLID_FOREGROUND);
 
             DataFormat dataFormat = row.getSheet().getWorkbook().createDataFormat();
             validDateStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.LIGHT_GREEN.getIndex(), CellStyle.SOLID_FOREGROUND);
             validDateStyle.setDataFormat(dataFormat.getFormat("yyyy-MM-dd"));
-            errorDateStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.RED.getIndex(), CellStyle.SOLID_FOREGROUND);
+            errorDateStyle = ExcelUtils.buildBasicCellStyle( this.row, IndexedColors.ORANGE.getIndex(), CellStyle.SOLID_FOREGROUND);
         }
     }
 
@@ -127,16 +136,16 @@ public class EventFileProcessingHelper extends EventHelper{
      */
     private void validateRow(Row row){
         validRow = true;
-        validRow &= validateCell(row, SIO_COLUMN_INDEX, this::getSIOFromCell, validStyle, errorStyle);
-        validRow &= validateCell(row, TYPE_COLUMN_INDEX, this::getEventTypeFromCell, validStyle, errorStyle);
+        validRow &= validateCell(row, SIO_COLUMN_INDEX, this::getSIOFromCell, validStyle, warningStyle);
+        validRow &= validateCell(row, TYPE_COLUMN_INDEX, this::getEventTypeFromCell, validStyle, warningStyle);
         validRow &= validateCollaborator(row.getCell(COLLABORATOR_COLUMN_INDEX));
         validRow &= validateArea(row.getCell(AREA_COLUMN_INDEX));
         validRow &= validateCell(row, CREATED_DATE_COLUMN_INDEX, this::getCreatedDateFromCell, validDateStyle, errorDateStyle);
-        validRow &= validateCell(row, DESCRIPTION_COLUMN_INDEX, this::getRequiredString, validStyle, errorStyle);
-        validRow &= validateCell(row, TASK_DESCRIPTION_COLUMN_INDEX, this::getRequiredString, validStyle, errorStyle);
+        validRow &= validateCell(row, DESCRIPTION_COLUMN_INDEX, this::getRequiredString, validStyle, warningStyle);
+        validRow &= validateCell(row, TASK_DESCRIPTION_COLUMN_INDEX, this::getRequiredString, validStyle, warningStyle);
         validRow &= validateResponsible(row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX));
-        validRow &= validateCell(row, SEVERITY_COLUMN_INDEX, this::getSeverityTypeFromCell, validStyle, errorStyle);
-        validRow &= validateCell(row, PROBABILITY_COLUMN_INDEX, this::getProbabilityTypeFromCell, validStyle, errorStyle);
+        validRow &= validateCell(row, SEVERITY_COLUMN_INDEX, this::getSeverityTypeFromCell, validStyle, warningStyle);
+        validRow &= validateCell(row, PROBABILITY_COLUMN_INDEX, this::getProbabilityTypeFromCell, validStyle, warningStyle);
         setRowValidationResult();
     }
 
@@ -157,11 +166,11 @@ public class EventFileProcessingHelper extends EventHelper{
             cell.setCellStyle(validStyle);
             return true;
         }catch (IllegalArgumentException e){
-            cell.setCellStyle(errorStyle);
+            cell.setCellStyle(warningStyle);
             return false;
         }catch (NullPointerException e){
             cell = row.createCell(cellIndex);
-            cell.setCellStyle(errorStyle);
+            cell.setCellStyle(warningStyle);
             return false;
         }
     }
@@ -242,12 +251,10 @@ public class EventFileProcessingHelper extends EventHelper{
      */
     private void applyValidationStyleToEntityCell(boolean validEntity, Cell entityCell){
         if(validEntity){
-            entityCell.getCellStyle().setFillForegroundColor(validStyle.getFillForegroundColor());
-            entityCell.getCellStyle().setFillPattern(validStyle.getFillPattern());
+            entityCell.setCellStyle(validStyle);
         }else{
             validRow &= false;
-            entityCell.getCellStyle().setFillForegroundColor(errorStyle.getFillForegroundColor());
-            entityCell.getCellStyle().setFillPattern(errorStyle.getFillPattern());
+            entityCell.setCellStyle(warningStyle);
         }
     }
 
@@ -262,7 +269,7 @@ public class EventFileProcessingHelper extends EventHelper{
         if(validRow){
             row.getCell(VALID_ROW_COLUMN_INDEX).setCellStyle(validStyle);
         }else{
-            row.getCell(VALID_ROW_COLUMN_INDEX).setCellStyle(errorStyle);
+            row.getCell(VALID_ROW_COLUMN_INDEX).setCellStyle(warningStyle);
         }
     }
 
