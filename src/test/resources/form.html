@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Form</title>
+</head>
+<body>
+<p>
+    Clean events file:
+    <form action="http://localhost:8080/utils/cleanEventFile" method="post" enctype="multipart/form-data">
+        <input type="file" name="eventFile">
+        <button type="submit">Submit</button>
+    </form>
+</p>
+<p>
+    Load bulk events:
+    <form action="http://localhost:8080/event/bulkLoad" method="post" enctype="multipart/form-data">
+        <input type="file" name="eventsFile">
+        <button type="submit">Submit</button>
+    </form>
+</p>
+</body>
+</html>
