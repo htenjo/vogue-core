@@ -37,8 +37,10 @@ public class Event extends BaseEntity{
     private Date createdDate;
 
     @JsonView(View.Summary.class)
+    @Column(length = 10000)
     private String description;
 
+    @Column(length = 10000)
     private String measures;
 
     @Enumerated(value = EnumType.STRING)

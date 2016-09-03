@@ -4,10 +4,12 @@ import co.zero.common.files.ExcelUtils;
 import co.zero.vogue.common.type.ProbabilityType;
 import co.zero.vogue.common.type.EventType;
 import co.zero.vogue.common.type.SeverityType;
+import co.zero.vogue.service.EventService;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.util.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +28,9 @@ import java.io.IOException;
 @CrossOrigin
 @RestController
 public class UtilsResource {
+    @Autowired
+    EventService service;
+
     @RequestMapping("/utils/reportTypes")
     public EventType[] getReportTypes(){
         return EventType.values();
@@ -46,6 +51,7 @@ public class UtilsResource {
             @RequestParam(value="eventFile") MultipartFile file) throws IOException, InvalidFormatException {
         Workbook workbook = WorkbookFactory.create(file.getInputStream());
         ExcelUtils.removeAllMergedCellsFromWorkbook(workbook);
+        service.copyOriginalFileInCleanFile(workbook);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         workbook.write(baos);
         ByteArrayResource byteArrayResource = new ByteArrayResource(baos.toByteArray());
