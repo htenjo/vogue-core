@@ -38,26 +38,49 @@ public class EventServiceImpl implements EventService {
     @Autowired
     TaskRepository taskRepository;
 
+    /**
+     *
+     * @param pageable
+     * @return
+     */
     @Override
     public Page<Event> list(Pageable pageable) {
         return eventRepository.findAll(pageable);
     }
 
+    /**
+     *
+     * @param incidentId
+     * @return
+     */
     @Override
     public Event find(long incidentId) {
         return eventRepository.findOne(incidentId);
     }
 
+    /**
+     *
+     * @param event
+     * @return
+     */
     @Override
     public Event save(Event event) {
         return eventRepository.save(event);
     }
 
+    /**
+     *
+     * @param event
+     * @return
+     */
     @Override
     public Event update(Event event) {
         return save(event);
     }
 
+    /**
+     *
+     */
     @Override
     public void deleteAll() {
         taskRepository.deleteAll();
@@ -103,5 +126,15 @@ public class EventServiceImpl implements EventService {
     public void copyOriginalFileInCleanFile(Workbook workbook) {
         EventFileCleanerHelper fileCleanerHelper = new EventFileCleanerHelper();
         fileCleanerHelper.clean(workbook, DEFAULT_SHEET_INDEX, DEFAULT_START_ROW_INDEX);
+    }
+
+    /**
+     *
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Page<Event> listCloseToExpire(Pageable pageable) {
+        return eventRepository.findCloseToExpire(pageable);
     }
 }

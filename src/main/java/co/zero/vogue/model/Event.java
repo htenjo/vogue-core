@@ -1,10 +1,12 @@
 package co.zero.vogue.model;
 
+import co.zero.vogue.common.Constant;
 import co.zero.vogue.common.type.ClassType;
 import co.zero.vogue.common.type.EventType;
 import co.zero.vogue.common.type.ProbabilityType;
 import co.zero.vogue.common.type.SeverityType;
 import co.zero.vogue.common.view.View;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -34,6 +36,7 @@ public class Event extends BaseEntity{
 
     @Temporal(value = TemporalType.TIMESTAMP)
     @JsonView(View.Summary.class)
+    @JsonFormat(pattern= Constant.DEFAULT_DATE_FORMAT)
     private Date createdDate;
 
     @JsonView(View.Summary.class)

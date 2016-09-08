@@ -36,4 +36,14 @@ public class TaskServiceImpl implements TaskService {
     public Task update(Task task) {
         return save(task);
     }
+
+    /**
+     *
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Page<Task> listCloseToExpire(Pageable pageable) {
+        return repository.findCloseToExpire(pageable);
+    }
 }

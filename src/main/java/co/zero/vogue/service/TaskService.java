@@ -13,4 +13,5 @@ public interface TaskService {
     public Task find(long taskId);
     public Task save(Task task);
     public Task update(Task task);
+    public Page<Task> listCloseToExpire(Pageable pageable);
 }

@@ -30,17 +30,32 @@ public class EventResource {
     @Autowired
     EventService service;
 
+    /**
+     *
+     * @param pageable
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET)
     //TODO: Determine if is still required the JsonView to not retrieve all relations
     public Page<Event> list(Pageable pageable){
         return service.list(pageable);
     }
 
+    /**
+     *
+     * @param eventId
+     * @return
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Event findEvent(@PathVariable("id") long eventId){
         return service.find(eventId);
     }
 
+    /**
+     *
+     * @param event
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Event> save(@RequestBody Event event){
         Event eventPersisted = service.save(event);
@@ -78,9 +93,23 @@ public class EventResource {
                 .body(byteArrayResource);
     }
 
+    /**
+     *
+     */
     @RequestMapping(value = "/all", method = RequestMethod.DELETE)
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteAll(){
         service.deleteAll();
+    }
+
+    /**
+     *
+     * @param pageable
+     * @return
+     */
+    @RequestMapping(value = "/closeToExpire", method = RequestMethod.GET)
+    //TODO: Determine if is still required the JsonView to not retrieve all relations
+    public Page<Event> listCloseToExpire(Pageable pageable){
+        return service.listCloseToExpire(pageable);
     }
 }
