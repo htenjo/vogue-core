@@ -2,6 +2,7 @@ package co.zero.vogue.persistence;
 
 import co.zero.vogue.model.Task;
 import co.zero.vogue.report.ReportClosedTasksInLastYear;
+import co.zero.vogue.report.ReportOpenTasksPerEventType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -26,8 +27,8 @@ public interface TaskRepository extends PagingAndSortingRepository<Task, Long> {
 
     /**
      *
-     * @param startDate Start date in format yyyy-MM-dd
-     * @param endDate End date in format yyyy-MM-dd
+     * @param startDate Start date
+     * @param endDate End date
      * @return
      */
     @Query("SELECT new co.zero.vogue.report.ReportClosedTasksInLastYear(" +
@@ -37,4 +38,16 @@ public interface TaskRepository extends PagingAndSortingRepository<Task, Long> {
     ReportClosedTasksInLastYear reportClosedTasksInLastYear(
             @Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
+
+    /**
+     *
+     * @return
+     */
+    @Query("SELECT new co.zero.vogue.report.ReportOpenTasksPerEventType(t.event.eventType, count(1))" +
+            " FROM Task t" +
+            " WHERE t.percentageCompleted < 1" +
+            " GROUP BY t.event.eventType")
+    List<ReportOpenTasksPerEventType> reportOpenTasksPerEventType();
+
+
 }
