@@ -1,5 +1,7 @@
 package co.zero.vogue.model;
 
+import co.zero.vogue.common.Constant;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.persistence.Entity;
@@ -16,7 +18,8 @@ import java.util.Date;
 public class Task extends BaseEntity{
     private String description;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @JsonFormat(pattern= Constant.DEFAULT_DATE_FORMAT)
+    @Temporal(value = TemporalType.DATE)
     private Date createdDate;
 
     @ManyToOne
@@ -27,7 +30,8 @@ public class Task extends BaseEntity{
 
     private double percentageCompleted;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @JsonFormat(pattern= Constant.DEFAULT_DATE_FORMAT)
+    @Temporal(value = TemporalType.DATE)
     private Date expectedClosedDate;
 
     private String closedComments;

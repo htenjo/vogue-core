@@ -1,0 +1,7 @@
+<!-- TODO: extract queries defined in repositories to this external file
+<named-query name="Event.existBySio">
+    <query>
+        SELECT CASE WHEN COUNT(e) > 0 THEN true ELSE false END FROM Event e WHERE e.sio = :sio
+    </query>
+</named-query>
+-->

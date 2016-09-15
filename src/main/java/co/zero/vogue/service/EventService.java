@@ -18,4 +18,5 @@ public interface EventService {
     public void bulkLoad(Workbook workbook);
     public void copyOriginalFileInCleanFile(Workbook workbook);
     public void deleteAll();
+    public Page<Event> listCloseToExpire(Pageable pageable);
 }
