@@ -6,6 +6,7 @@ import co.zero.vogue.model.Task;
 import co.zero.vogue.persistence.EventRepository;
 import co.zero.vogue.persistence.TaskRepository;
 import co.zero.vogue.report.ReportClosedTasksInLastYear;
+import co.zero.vogue.report.ReportOpenTasksPerEventType;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by htenjo on 6/2/16.
@@ -72,5 +74,10 @@ public class TaskServiceImpl implements TaskService {
         report.setStartDate(startDateFormated);
         report.setEndDate(endDateFormated);
         return report;
+    }
+
+    @Override
+    public List<ReportOpenTasksPerEventType> reportOpenTasksPerEventType() {
+        return repository.reportOpenTasksPerEventType();
     }
 }
