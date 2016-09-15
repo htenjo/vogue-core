@@ -1,7 +1,7 @@
 package co.zero.vogue.helper;
 
 import co.zero.common.files.ExcelUtils;
-import co.zero.vogue.common.Constant;
+import co.zero.vogue.common.Constants;
 import org.apache.poi.ss.usermodel.*;
 
 import java.util.Date;
@@ -190,7 +190,7 @@ public class EventFileCleanerHelper extends EventHelper{
         if(dateCellStyle == null){
             CreationHelper createHelper = sheet.getWorkbook().getCreationHelper();
             dateCellStyle = sheet.getWorkbook().createCellStyle();
-            dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat(Constant.DEFAULT_DATE_FORMAT));
+            dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat(Constants.DEFAULT_DATE_FORMAT));
         }
     }
 }

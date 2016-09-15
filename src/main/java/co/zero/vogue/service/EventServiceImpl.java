@@ -101,16 +101,19 @@ public class EventServiceImpl implements EventService {
 
         for (int rowIndex = DEFAULT_START_ROW_INDEX; rowIndex <= lastRowIndex; rowIndex++) {
             Row currentRow = sheet.getRow(rowIndex);
-            fileHelper.processRow(currentRow);
 
-            if(fileHelper.isValidRow()){
-                try{
-                    Event event = fileHelper.buildEventFromRow();
-                    event = eventRepository.save(event);
-                    Task task = fileHelper.buildTaskFromRow(event);
-                    taskRepository.save(task);
-                }catch (Exception e){
-                    fileHelper.addRowErrorMessage("Error saving the row in the DB (Maybe the SIO already exist)");
+            if(currentRow != null) {
+                fileHelper.processRow(currentRow);
+
+                if (fileHelper.isValidRow()) {
+                    try {
+                        Event event = fileHelper.buildEventFromRow();
+                        event = eventRepository.save(event);
+                        Task task = fileHelper.buildTaskFromRow(event);
+                        taskRepository.save(task);
+                    } catch (Exception e) {
+                        fileHelper.addRowErrorMessage("Error saving the row in the DB (Maybe the SIO already exist)");
+                    }
                 }
             }
         }

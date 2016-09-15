@@ -135,15 +135,22 @@ public class EventFileProcessingHelper extends EventHelper{
      * @param row
      */
     private void validateRow(Row row){
+        Cell areaCell = row.getCell(AREA_COLUMN_INDEX) == null ?
+                row.createCell(AREA_COLUMN_INDEX) : row.getCell(AREA_COLUMN_INDEX);
+        Cell collaboratorCell = row.getCell(COLLABORATOR_COLUMN_INDEX) == null ?
+                row.createCell(COLLABORATOR_COLUMN_INDEX) : row.getCell(COLLABORATOR_COLUMN_INDEX);
+        Cell responsibleCell = row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX) == null ?
+                row.createCell(TASK_RESPONSIBLE_COLUMN_INDEX) : row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX);
+
         validRow = true;
         validRow &= validateCell(row, SIO_COLUMN_INDEX, this::getSIOFromCell, validStyle, warningStyle);
         validRow &= validateCell(row, TYPE_COLUMN_INDEX, this::getEventTypeFromCell, validStyle, warningStyle);
-        validRow &= validateCollaborator(row.getCell(COLLABORATOR_COLUMN_INDEX));
-        validRow &= validateArea(row.getCell(AREA_COLUMN_INDEX));
+        validRow &= validateCollaborator(collaboratorCell);
+        validRow &= validateArea(areaCell);
         validRow &= validateCell(row, CREATED_DATE_COLUMN_INDEX, this::getCreatedDateFromCell, validDateStyle, errorDateStyle);
         validRow &= validateCell(row, DESCRIPTION_COLUMN_INDEX, this::getRequiredString, validStyle, warningStyle);
         validRow &= validateCell(row, TASK_DESCRIPTION_COLUMN_INDEX, this::getRequiredString, validStyle, warningStyle);
-        validRow &= validateResponsible(row.getCell(TASK_RESPONSIBLE_COLUMN_INDEX));
+        validRow &= validateResponsible(responsibleCell);
         validRow &= validateCell(row, SEVERITY_COLUMN_INDEX, this::getSeverityTypeFromCell, validStyle, warningStyle);
         validRow &= validateCell(row, PROBABILITY_COLUMN_INDEX, this::getProbabilityTypeFromCell, validStyle, warningStyle);
         setRowValidationResult();
@@ -159,17 +166,13 @@ public class EventFileProcessingHelper extends EventHelper{
      * @return
      */
     private boolean validateCell(Row row, int cellIndex, Function<Cell, Object> function, CellStyle validStyle, CellStyle errorStyle){
-        Cell cell = row.getCell(cellIndex);
+        Cell cell = row.getCell(cellIndex) == null ? row.createCell(cellIndex) : row.getCell(cellIndex);
 
         try{
             function.apply(cell);
             cell.setCellStyle(validStyle);
             return true;
-        }catch (IllegalArgumentException e){
-            cell.setCellStyle(warningStyle);
-            return false;
-        }catch (NullPointerException e){
-            cell = row.createCell(cellIndex);
+        }catch (IllegalArgumentException | NullPointerException  e){
             cell.setCellStyle(warningStyle);
             return false;
         }
@@ -250,11 +253,13 @@ public class EventFileProcessingHelper extends EventHelper{
      * @param entityCell
      */
     private void applyValidationStyleToEntityCell(boolean validEntity, Cell entityCell){
-        if(validEntity){
-            entityCell.setCellStyle(validStyle);
-        }else{
-            validRow &= false;
-            entityCell.setCellStyle(warningStyle);
+        if(entityCell != null) {
+            if (validEntity) {
+                entityCell.setCellStyle(validStyle);
+            } else {
+                validRow &= false;
+                entityCell.setCellStyle(warningStyle);
+            }
         }
     }
 

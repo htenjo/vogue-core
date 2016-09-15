@@ -1,6 +1,6 @@
 package co.zero.vogue.model;
 
-import co.zero.vogue.common.Constant;
+import co.zero.vogue.common.Constants;
 import co.zero.vogue.common.type.ClassType;
 import co.zero.vogue.common.type.EventType;
 import co.zero.vogue.common.type.ProbabilityType;
@@ -36,7 +36,7 @@ public class Event extends BaseEntity{
 
     @Temporal(value = TemporalType.DATE)
     @JsonView(View.Summary.class)
-    @JsonFormat(pattern= Constant.DEFAULT_DATE_FORMAT)
+    @JsonFormat(pattern= Constants.DEFAULT_DATE_FORMAT)
     private Date createdDate;
 
     @JsonView(View.Summary.class)

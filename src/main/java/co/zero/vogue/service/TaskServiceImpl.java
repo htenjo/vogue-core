@@ -1,9 +1,7 @@
 package co.zero.vogue.service;
 
-import co.zero.vogue.common.Constant;
-import co.zero.vogue.model.Event;
+import co.zero.vogue.common.Constants;
 import co.zero.vogue.model.Task;
-import co.zero.vogue.persistence.EventRepository;
 import co.zero.vogue.persistence.TaskRepository;
 import co.zero.vogue.report.ReportClosedTasksInLastYear;
 import co.zero.vogue.report.ReportOpenTasksPerEventType;
@@ -13,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -68,8 +65,8 @@ public class TaskServiceImpl implements TaskService {
         startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
         endDate.set(Calendar.DAY_OF_MONTH, endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
 
-        String startDateFormated = DateFormatUtils.format(startDate, Constant.DEFAULT_DATE_FORMAT);
-        String endDateFormated = DateFormatUtils.format(endDate, Constant.DEFAULT_DATE_FORMAT);
+        String startDateFormated = DateFormatUtils.format(startDate, Constants.DEFAULT_DATE_FORMAT);
+        String endDateFormated = DateFormatUtils.format(endDate, Constants.DEFAULT_DATE_FORMAT);
         ReportClosedTasksInLastYear report = repository.reportClosedTasksInLastYear(startDate.getTime(), endDate.getTime());
         report.setStartDate(startDateFormated);
         report.setEndDate(endDateFormated);

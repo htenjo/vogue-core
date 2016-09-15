@@ -1,6 +1,7 @@
 package co.zero.vogue.helper;
 
 import co.zero.common.files.ExcelUtils;
+import co.zero.vogue.common.Constants;
 import co.zero.vogue.common.type.EventType;
 import co.zero.vogue.common.type.ProbabilityType;
 import co.zero.vogue.common.type.SeverityType;
@@ -77,6 +78,10 @@ public abstract class EventHelper {
     protected EventType getEventTypeFromCell(Cell cell){
         try{
             String value = ExcelUtils.getCellStringValueNoSpaces(cell);
+            value = StringUtils
+                    .trim(value)
+                    .replace(StringUtils.SPACE, Constants.UNDERSCORE)
+                    .toUpperCase();
             return EventType.valueOf(value);
         }catch(NullPointerException e){
             throw new IllegalArgumentException(e);
