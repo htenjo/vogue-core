@@ -2,6 +2,7 @@ package co.zero.vogue.resource;
 
 import co.zero.vogue.model.Event;
 import co.zero.vogue.model.Task;
+import co.zero.vogue.report.ReportClosedTasksInLastYear;
 import co.zero.vogue.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -61,5 +62,15 @@ public class TaskResource {
     //TODO: Determine if is still required the JsonView to not retrieve all relations
     public Page<Task> listCloseToExpire(Pageable pageable){
         return service.listCloseToExpire(pageable);
+    }
+
+    /**
+     *
+     * @return
+     */
+    @RequestMapping(value = "/reportClosedTasksInLastYearResponseEntity", method = RequestMethod.GET)
+    public ResponseEntity<ReportClosedTasksInLastYear> reportClosedTasksInLastYearResponseEntity(){
+        ReportClosedTasksInLastYear report = service.reportClosedTasksInLastYear();
+        return new ResponseEntity<>(report, HttpStatus.OK);
     }
 }

@@ -34,7 +34,7 @@ public class Event extends BaseEntity{
     @ManyToOne
     private Area area;
 
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @Temporal(value = TemporalType.DATE)
     @JsonView(View.Summary.class)
     @JsonFormat(pattern= Constant.DEFAULT_DATE_FORMAT)
     private Date createdDate;

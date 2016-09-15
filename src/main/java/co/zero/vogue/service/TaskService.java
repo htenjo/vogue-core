@@ -2,6 +2,7 @@ package co.zero.vogue.service;
 
 import co.zero.vogue.model.Event;
 import co.zero.vogue.model.Task;
+import co.zero.vogue.report.ReportClosedTasksInLastYear;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,4 +15,5 @@ public interface TaskService {
     public Task save(Task task);
     public Task update(Task task);
     public Page<Task> listCloseToExpire(Pageable pageable);
+    public ReportClosedTasksInLastYear reportClosedTasksInLastYear();
 }
