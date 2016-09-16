@@ -108,7 +108,14 @@ public class EventServiceImpl implements EventService {
                 if (fileHelper.isValidRow()) {
                     try {
                         Event event = fileHelper.buildEventFromRow();
-                        event = eventRepository.save(event);
+
+                        //TODO: think how to improve this (maybe implementing the JPA/Hibernate Cache L2)
+                        if(eventRepository.existBySio(event.getSio())){
+                            event = eventRepository.findFirstBySio(event.getSio());
+                        }else{
+                            event = eventRepository.save(event);
+                        }
+
                         Task task = fileHelper.buildTaskFromRow(event);
                         taskRepository.save(task);
                     } catch (Exception e) {
