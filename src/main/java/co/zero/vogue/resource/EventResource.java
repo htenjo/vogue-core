@@ -1,7 +1,10 @@
 package co.zero.vogue.resource;
 
 import co.zero.common.files.ExcelUtils;
+import co.zero.vogue.common.Constants;
 import co.zero.vogue.model.Event;
+import co.zero.vogue.report.ReportEventsCreatedByArea;
+import co.zero.vogue.report.ReportEventsCreatedByEventType;
 import co.zero.vogue.service.EventService;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -10,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by htenjo on 5/29/16.
@@ -107,9 +113,62 @@ public class EventResource {
      * @param pageable
      * @return
      */
-    @RequestMapping(value = "/closeToExpire", method = RequestMethod.GET)
+    @RequestMapping(value = "/report/closeToExpire", method = RequestMethod.GET)
     //TODO: Determine if is still required the JsonView to not retrieve all relations
-    public Page<Event> listCloseToExpire(Pageable pageable){
+    public Page<Event> reportListCloseToExpire(Pageable pageable){
         return service.listCloseToExpire(pageable);
+    }
+
+    /**
+     *
+     * @param startDate
+     * @param endDate
+     * @param pageable
+     * @return
+     */
+    @RequestMapping(value = "/report/createdByArea", method = RequestMethod.GET)
+    public Page<List<ReportEventsCreatedByArea>> reportCreatedByArea(
+            @RequestParam(name = "startDate")
+            @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
+                    Date startDate,
+            @RequestParam(name = "endDate")
+            @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
+                    Date endDate,
+            Pageable pageable) {
+        return service.createdByArea(startDate, endDate, pageable);
+    }
+
+    /**
+     *
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    @RequestMapping(value = "/report/countCreated", method = RequestMethod.GET)
+    public Long reportCountCreatedBetween(
+            @RequestParam(name = "startDate")
+            @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
+                    Date startDate,
+            @RequestParam(name = "endDate")
+            @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
+                    Date endDate) {
+        return service.countByCreatedDateBetween(startDate, endDate);
+    }
+
+    /**
+     *
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    @RequestMapping(value = "/report/createdByEventType", method = RequestMethod.GET)
+    public List<ReportEventsCreatedByEventType> reportCreatedByEventType(
+            @RequestParam(name = "startDate")
+            @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
+                    Date startDate,
+            @RequestParam(name = "endDate")
+            @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
+                    Date endDate) {
+        return service.createdByEventType(startDate, endDate);
     }
 }

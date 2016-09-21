@@ -1,16 +1,20 @@
 package co.zero.vogue.resource;
 
+import co.zero.vogue.common.Constants;
 import co.zero.vogue.model.Task;
-import co.zero.vogue.report.ReportClosedTasksInLastYear;
-import co.zero.vogue.report.ReportOpenTasksPerEventType;
+import co.zero.vogue.report.ReportTasksByEmployee;
+import co.zero.vogue.report.ReportTasksClosedInLastYear;
+import co.zero.vogue.report.ReportTasksOpenPerEventType;
 import co.zero.vogue.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -71,8 +75,8 @@ public class TaskResource {
      * @return
      */
     @RequestMapping(value = "/reportClosedTasksInLastYearResponseEntity", method = RequestMethod.GET)
-    public ResponseEntity<ReportClosedTasksInLastYear> reportClosedTasksInLastYearResponseEntity(){
-        ReportClosedTasksInLastYear report = service.reportClosedTasksInLastYear();
+    public ResponseEntity<ReportTasksClosedInLastYear> reportClosedTasksInLastYearResponseEntity(){
+        ReportTasksClosedInLastYear report = service.reportClosedTasksInLastYear();
         return new ResponseEntity<>(report, HttpStatus.OK);
     }
 
@@ -81,8 +85,24 @@ public class TaskResource {
      * @return
      */
     @RequestMapping(value = "/reportOpenTasksPerEventType", method = RequestMethod.GET)
-    public ResponseEntity<List<ReportOpenTasksPerEventType>> reportOpenTasksPerEventType(){
-        List<ReportOpenTasksPerEventType> report = service.reportOpenTasksPerEventType();
+    public ResponseEntity<List<ReportTasksOpenPerEventType>> reportOpenTasksPerEventType(){
+        List<ReportTasksOpenPerEventType> report = service.reportOpenTasksPerEventType();
         return new ResponseEntity<>(report, HttpStatus.OK);
+    }
+
+    /**
+     *
+     * @return
+     */
+    @RequestMapping(value = "/reportTasksByEmployee", method = RequestMethod.GET)
+    public Page<List<ReportTasksByEmployee>> reportOpenTasksPerEventType(
+            @RequestParam(name = "startDate")
+            @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
+                    Date startDate,
+            @RequestParam(name = "endDate")
+            @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
+                    Date endDate,
+            Pageable pageable){
+        return service.reportTasksByEmployee(startDate, endDate, pageable);
     }
 }

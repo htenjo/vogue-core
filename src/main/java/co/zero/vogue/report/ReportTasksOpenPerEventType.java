@@ -5,11 +5,11 @@ import co.zero.vogue.common.type.EventType;
 /**
  * Created by htenjo on 9/15/16.
  */
-public class ReportOpenTasksPerEventType {
+public class ReportTasksOpenPerEventType {
     private EventType type;
     private long openTasks;
 
-    public ReportOpenTasksPerEventType(EventType type, long openTasks) {
+    public ReportTasksOpenPerEventType(EventType type, long openTasks) {
         this.type = type;
         this.openTasks = openTasks;
     }

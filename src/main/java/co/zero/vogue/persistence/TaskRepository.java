@@ -1,8 +1,9 @@
 package co.zero.vogue.persistence;
 
 import co.zero.vogue.model.Task;
-import co.zero.vogue.report.ReportClosedTasksInLastYear;
-import co.zero.vogue.report.ReportOpenTasksPerEventType;
+import co.zero.vogue.report.ReportTasksByEmployee;
+import co.zero.vogue.report.ReportTasksClosedInLastYear;
+import co.zero.vogue.report.ReportTasksOpenPerEventType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -31,11 +32,11 @@ public interface TaskRepository extends PagingAndSortingRepository<Task, Long> {
      * @param endDate End date
      * @return
      */
-    @Query("SELECT new co.zero.vogue.report.ReportClosedTasksInLastYear(" +
+    @Query("SELECT new co.zero.vogue.report.ReportTasksClosedInLastYear(" +
             "SUM(CASE WHEN t.percentageCompleted < 1 THEN 1 ELSE 0 END), COUNT(1))" +
             " FROM Task t" +
             " WHERE t.createdDate BETWEEN :startDate AND :endDate")
-    ReportClosedTasksInLastYear reportClosedTasksInLastYear(
+    ReportTasksClosedInLastYear reportClosedTasksInLastYear(
             @Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
 
@@ -43,11 +44,26 @@ public interface TaskRepository extends PagingAndSortingRepository<Task, Long> {
      *
      * @return
      */
-    @Query("SELECT new co.zero.vogue.report.ReportOpenTasksPerEventType(t.event.eventType, count(1))" +
+    @Query("SELECT new co.zero.vogue.report.ReportTasksOpenPerEventType(t.event.eventType, count(1))" +
             " FROM Task t" +
             " WHERE t.percentageCompleted < 1" +
             " GROUP BY t.event.eventType")
-    List<ReportOpenTasksPerEventType> reportOpenTasksPerEventType();
+    List<ReportTasksOpenPerEventType> reportOpenTasksPerEventType();
 
-
+    /**
+     *
+     * @return
+     */
+    @Query("SELECT new co.zero.vogue.report.ReportTasksByEmployee(emp, " +
+            " SUM(CASE WHEN t.percentageCompleted < 1 THEN 1 ELSE 0 END) as open, " +
+            " SUM(CASE WHEN t.percentageCompleted = 1 THEN 1 ELSE 0 END) as closed)" +
+            " FROM Task t" +
+            "   INNER JOIN t.responsible as emp" +
+            " WHERE t.createdDate BETWEEN :startDate AND :endDate" +
+            " GROUP BY emp" +
+            " ORDER BY open DESC")
+    Page<List<ReportTasksByEmployee>> reportTasksByEmployee(
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate,
+            Pageable pageable);
 }

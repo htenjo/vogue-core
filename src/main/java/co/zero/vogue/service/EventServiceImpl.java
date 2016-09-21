@@ -10,12 +10,16 @@ import co.zero.vogue.persistence.AreaRepository;
 import co.zero.vogue.persistence.EmployeeRepository;
 import co.zero.vogue.persistence.EventRepository;
 import co.zero.vogue.persistence.TaskRepository;
+import co.zero.vogue.report.ReportEventsCreatedByArea;
+import co.zero.vogue.report.ReportEventsCreatedByEventType;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -146,5 +150,34 @@ public class EventServiceImpl implements EventService {
     @Override
     public Page<Event> listCloseToExpire(Pageable pageable) {
         return eventRepository.findCloseToExpire(pageable);
+    }
+
+    /**
+     * This method
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    @Override
+    public Page<List<ReportEventsCreatedByArea>> createdByArea(
+            Date startDate, Date endDate, Pageable pageable) {
+        return eventRepository.createdByArea(startDate, endDate, pageable);
+    }
+
+    /**
+     *
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    @Override
+    public Long countByCreatedDateBetween(Date startDate, Date endDate) {
+        return eventRepository.countByCreatedDateBetween(startDate, endDate);
+    }
+
+
+    @Override
+    public List<ReportEventsCreatedByEventType> createdByEventType(Date startDate, Date endDate) {
+        return eventRepository.createdByEventType(startDate, endDate);
     }
 }

@@ -5,13 +5,13 @@ package co.zero.vogue.report;
  * The start and end dates should be calculated from the current date
  * Created by htenjo on 9/15/16.
  */
-public class ReportClosedTasksInLastYear {
+public class ReportTasksClosedInLastYear {
     private long totalTasks;
     private long openTasks;
     private String startDate;
     private String endDate;
 
-    public ReportClosedTasksInLastYear(long openTasks, long totalTasks) {
+    public ReportTasksClosedInLastYear(long openTasks, long totalTasks) {
         this.totalTasks = totalTasks;
         this.openTasks = openTasks;
     }
