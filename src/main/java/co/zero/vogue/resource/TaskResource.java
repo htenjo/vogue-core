@@ -22,7 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/task")
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class TaskResource {
     @Autowired
     TaskService service;
@@ -74,8 +74,8 @@ public class TaskResource {
      *
      * @return
      */
-    @RequestMapping(value = "/reportClosedTasksInLastYearResponseEntity", method = RequestMethod.GET)
-    public ResponseEntity<ReportTasksClosedInLastYear> reportClosedTasksInLastYearResponseEntity(){
+    @RequestMapping(value = "/reportClosedTasksInLastYear", method = RequestMethod.GET)
+    public ResponseEntity<ReportTasksClosedInLastYear> reportClosedTasksInLastYear(){
         ReportTasksClosedInLastYear report = service.reportClosedTasksInLastYear();
         return new ResponseEntity<>(report, HttpStatus.OK);
     }
