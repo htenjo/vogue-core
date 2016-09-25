@@ -44,10 +44,11 @@ public interface TaskRepository extends PagingAndSortingRepository<Task, Long> {
      *
      * @return
      */
-    @Query("SELECT new co.zero.vogue.report.ReportTasksOpenPerEventType(t.event.eventType, count(1))" +
+    @Query("SELECT new co.zero.vogue.report.ReportTasksOpenPerEventType(t.event.eventType, count(1) as open_tasks)" +
             " FROM Task t" +
             " WHERE t.percentageCompleted < 1" +
-            " GROUP BY t.event.eventType")
+            " GROUP BY t.event.eventType" +
+            " ORDER BY open_tasks DESC")
     List<ReportTasksOpenPerEventType> reportOpenTasksPerEventType();
 
     /**

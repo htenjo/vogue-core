@@ -18,8 +18,8 @@ import java.util.Date;
 public class Task extends BaseEntity{
     private String description;
 
-    @JsonFormat(pattern= Constants.DEFAULT_DATE_FORMAT)
     @Temporal(value = TemporalType.DATE)
+    @JsonFormat(pattern= Constants.DEFAULT_DATE_FORMAT)
     private Date createdDate;
 
     @ManyToOne
@@ -30,8 +30,8 @@ public class Task extends BaseEntity{
 
     private double percentageCompleted;
 
-    @JsonFormat(pattern= Constants.DEFAULT_DATE_FORMAT)
     @Temporal(value = TemporalType.DATE)
+    @JsonFormat(pattern= Constants.DEFAULT_DATE_FORMAT)
     private Date expectedClosedDate;
 
     private String closedComments;
