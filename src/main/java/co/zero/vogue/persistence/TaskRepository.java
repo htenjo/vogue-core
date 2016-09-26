@@ -62,6 +62,7 @@ public interface TaskRepository extends PagingAndSortingRepository<Task, Long> {
             "   INNER JOIN t.responsible as emp" +
             " WHERE t.createdDate BETWEEN :startDate AND :endDate" +
             " GROUP BY emp" +
+            " HAVING SUM(CASE WHEN t.percentageCompleted < 1 THEN 1 ELSE 0 END) > 0" +
             " ORDER BY open DESC")
     Page<List<ReportTasksByEmployee>> reportTasksByEmployee(
             @Param("startDate") Date startDate,

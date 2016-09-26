@@ -95,7 +95,7 @@ public class TaskResource {
      * @return
      */
     @RequestMapping(value = "/reportTasksByEmployee", method = RequestMethod.GET)
-    public Page<List<ReportTasksByEmployee>> reportOpenTasksPerEventType(
+    public Page<List<ReportTasksByEmployee>> reportOpenTasksPerEmployee(
             @RequestParam(name = "startDate")
             @DateTimeFormat(pattern = Constants.DEFAULT_DATE_FORMAT)
                     Date startDate,
